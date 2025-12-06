@@ -1,9 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../supabaseClient';
-import { User } from '../types';
+
+interface AuthUser {
+  id: string;
+  email: string | null;
+  role?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -12,7 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   // Load active session on mount
   useEffect(() => {
@@ -21,14 +26,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const checkSession = async () => {
     const { data } = await supabase.auth.getSession();
-    if (data?.session?.user) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', data.session.user.id)
-        .single();
 
-      if (profile) setUser(profile as User);
+    if (data?.session?.user) {
+      setUser({
+        id: data.session.user.id,
+        email: data.session.user.email,
+        role: "admin", // إذا تحتاج دور معين
+      });
     }
   };
 
@@ -40,15 +44,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (error || !loginData.user) return false;
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', loginData.user.id)
-      .single();
+    setUser({
+      id: loginData.user.id,
+      email: loginData.user.email,
+      role: "admin",
+    });
 
-    if (!profile) return false;
-
-    setUser(profile as User);
     return true;
   };
 

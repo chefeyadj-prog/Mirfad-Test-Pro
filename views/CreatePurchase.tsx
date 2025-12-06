@@ -9,7 +9,7 @@ import {
 } from "../services/purchasesService";
 import { getSuppliers } from "../services/suppliersService";
 import { Supplier, Product, PurchaseItem } from "../types";
-import { extractPurchaseFromImage } from "../services/geminiService";
+import { analyzeInvoiceImage } from "../services/geminiService";
 
 const CreatePurchase: React.FC = () => {
   /* ---------------------------------------------------------

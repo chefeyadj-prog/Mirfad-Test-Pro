@@ -3,11 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 /* -------------------------
    IMPORT ALL PAGES CORRECTLY
-   FROM /views  (NOT /pages)
+   FROM /views
 -------------------------- */
 import Dashboard from "./views/Dashboard";
 import Sales from "./views/Sales";
@@ -28,7 +28,6 @@ import Login from "./views/Login";
 const AppLayout: React.FC = () => {
   const { user } = useAuth();
 
-  // حماية قوية ضد undefined لمنع الشاشة البيضاء
   const firstLetter = user?.name?.charAt?.(0)?.toUpperCase() ?? "";
 
   return (
@@ -36,19 +35,15 @@ const AppLayout: React.FC = () => {
       <Sidebar />
 
       <div className="flex-1 p-6 space-y-6">
-        {/* ------ TOP BAR ------ */}
         <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
           <h1 className="text-xl font-bold text-slate-800">
             نظام مِرفاد المحاسبي
           </h1>
 
           <div className="flex items-center gap-3">
-            {/* Avatar */}
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold uppercase">
               {firstLetter}
             </div>
-
-            {/* Info */}
             <div className="text-right">
               <p className="font-bold">{user?.name ?? ""}</p>
               <p className="text-xs text-slate-500">{user?.email ?? ""}</p>
@@ -56,7 +51,6 @@ const AppLayout: React.FC = () => {
           </div>
         </div>
 
-        {/* ------ ROUTES ------ */}
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/sales" element={<Sales />} />
@@ -83,22 +77,22 @@ const AppLayout: React.FC = () => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* صفحة تسجيل الدخول لا تحتاج حماية */}
-        <Route path="/login" element={<Login />} />
+    <AuthProvider>   {/* ← ← ← إضافة مهمة جداً */}
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-        {/* كل باقي الصفحات محمية */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

@@ -12,12 +12,14 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
+  loading: boolean; // ⭐ إضافة مهمة
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true); // ⭐ يبدأ التحميل
 
   // Load active session on mount
   useEffect(() => {
@@ -31,18 +33,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser({
         id: data.session.user.id,
         email: data.session.user.email,
-        role: "admin", // إذا تحتاج دور معين
+        role: "admin",
       });
     }
+
+    setLoading(false); // ⭐ انتهى التحميل
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true); // ⭐ يبدأ التحميل
+
     const { data: loginData, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
 
-    if (error || !loginData.user) return false;
+    if (error || !loginData.user) {
+      setLoading(false);
+      return false;
+    }
 
     setUser({
       id: loginData.user.id,
@@ -50,6 +59,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       role: "admin",
     });
 
+    setLoading(false);
     return true;
   };
 
@@ -59,7 +69,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        login, 
+        logout, 
+        isAuthenticated: !!user,
+        loading  // ⭐ إضافته هنا
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

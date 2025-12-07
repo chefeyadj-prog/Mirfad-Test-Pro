@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
@@ -18,6 +17,9 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Prevent crash before user loads
+  if (!user) return null;
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -34,8 +36,7 @@ const Sidebar = () => {
     { to: '/reports', icon: FileText, label: 'التقارير الذكية', roles: ['admin', 'accountant'] },
   ];
 
-  // Filter items based on user role
-  const allowedItems = allNavItems.filter(item => user && item.roles.includes(user.role));
+  const allowedItems = allNavItems.filter(item => item.roles.includes(user.role));
 
   return (
     <div className="w-64 bg-slate-900 text-white min-h-screen flex flex-col shadow-xl print:hidden">

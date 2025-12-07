@@ -5,25 +5,30 @@ import Sidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 
-// الصفحات
-import Dashboard from "./pages/Dashboard";
-import Sales from "./pages/Sales";
-import Purchases from "./pages/Purchases";
-import PurchaseDetails from "./pages/PurchaseDetails";
-import CreatePurchase from "./pages/CreatePurchase";
-import Suppliers from "./pages/Suppliers";
-import SupplierStatement from "./pages/SupplierStatement";
-import Inventory from "./pages/Inventory";
-import Custody from "./pages/Custody";
-import Salaries from "./pages/Salaries";
-import Reports from "./pages/Reports";
-import DailyClosingDetails from "./pages/DailyClosingDetails";
-import Login from "./pages/Login";
+/* -------------------------
+   IMPORT ALL PAGES CORRECTLY
+   FROM /views  (NOT /pages)
+-------------------------- */
+import Dashboard from "./views/Dashboard";
+import Sales from "./views/Sales";
+import Purchases from "./views/Purchases";
+import PurchaseDetails from "./views/PurchaseDetails";
+import CreatePurchase from "./views/CreatePurchase";
+import Suppliers from "./views/Suppliers";
+import SupplierStatement from "./views/SupplierStatement";
+import Inventory from "./views/Inventory";
+import Custody from "./views/Custody";
+import Salaries from "./views/Salaries";
+import Reports from "./views/Reports";
+import DailyClosingDetails from "./views/DailyClosingDetails";
+import Login from "./views/Login";
+
+/* ------------------------ */
 
 const AppLayout: React.FC = () => {
   const { user } = useAuth();
 
-  // حماية ضد undefined لمنع الشاشة البيضاء
+  // حماية قوية ضد undefined لمنع الشاشة البيضاء
   const firstLetter = user?.name?.charAt?.(0)?.toUpperCase() ?? "";
 
   return (
@@ -31,14 +36,19 @@ const AppLayout: React.FC = () => {
       <Sidebar />
 
       <div className="flex-1 p-6 space-y-6">
+        {/* ------ TOP BAR ------ */}
         <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow">
-          <h1 className="text-xl font-bold text-slate-800">نظام مِرفاد المحاسبي</h1>
+          <h1 className="text-xl font-bold text-slate-800">
+            نظام مِرفاد المحاسبي
+          </h1>
 
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold uppercase">
+            {/* Avatar */}
+            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold uppercase">
               {firstLetter}
             </div>
 
+            {/* Info */}
             <div className="text-right">
               <p className="font-bold">{user?.name ?? ""}</p>
               <p className="text-xs text-slate-500">{user?.email ?? ""}</p>
@@ -46,15 +56,19 @@ const AppLayout: React.FC = () => {
           </div>
         </div>
 
+        {/* ------ ROUTES ------ */}
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/sales" element={<Sales />} />
           <Route path="/sales/:id" element={<DailyClosingDetails />} />
+
           <Route path="/purchases" element={<Purchases />} />
           <Route path="/purchases/create" element={<CreatePurchase />} />
           <Route path="/purchases/:id" element={<PurchaseDetails />} />
+
           <Route path="/suppliers" element={<Suppliers />} />
           <Route path="/suppliers/:id" element={<SupplierStatement />} />
+
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/custody" element={<Custody />} />
           <Route path="/salaries" element={<Salaries />} />
@@ -65,16 +79,16 @@ const AppLayout: React.FC = () => {
   );
 };
 
+/* ------------------------ */
+
 function App() {
   return (
     <Router>
-      {/* حماية جميع الصفحات */}
       <Routes>
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+        {/* صفحة تسجيل الدخول لا تحتاج حماية */}
+        <Route path="/login" element={<Login />} />
 
+        {/* كل باقي الصفحات محمية */}
         <Route
           path="/*"
           element={
